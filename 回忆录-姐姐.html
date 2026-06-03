@@ -1,0 +1,650 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>欢迎来西安</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        vintage: {
+                            cream: '#fef9ef',
+                            paper: '#fdf3e0',
+                            warm: '#f5e6d3',
+                            gold: '#c9a96e',
+                            darkgold: '#a6844c',
+                            brown: '#6b4e3d',
+                            darkbrown: '#4a3228',
+                            rose: '#d4a99a',
+                        }
+                    },
+                    fontFamily: {
+                        display: ['"Noto Serif SC"', '"STSong"', '"SimSun"', 'serif'],
+                        body: ['"Noto Sans SC"', '"Microsoft YaHei"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@400;600;700&display=swap');
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Vintage photo frame effect */
+        .photo-frame {
+            position: relative;
+            background: white;
+            padding: 12px 12px 40px 12px;
+            box-shadow: 0 4px 15px rgba(107, 78, 61, 0.15), 0 1px 3px rgba(107, 78, 61, 0.1);
+            border-radius: 4px;
+            transition: all 0.35s ease;
+        }
+        .photo-frame:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 30px rgba(107, 78, 61, 0.22), 0 3px 8px rgba(107, 78, 61, 0.12);
+        }
+        .photo-frame .placeholder-img {
+            width: 100%;
+            aspect-ratio: 4/3;
+            background: linear-gradient(135deg, #fdf3e0 0%, #f5e6d3 30%, #fef9ef 60%, #fdf3e0 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 2px;
+            position: relative;
+            overflow: hidden;
+        }
+        .photo-frame .placeholder-img::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 3px,
+                rgba(201, 169, 110, 0.06) 3px,
+                rgba(201, 169, 110, 0.06) 6px
+            );
+        }
+
+        /* 相册内img样式 */
+        .photo-frame .placeholder-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        .photo-frame:hover .placeholder-img img {
+            transform: scale(1.02);
+        }
+
+        /* Hero decorative pattern */
+        .hero-pattern {
+            background: linear-gradient(135deg, #fef9ef 0%, #fdf3e0 40%, #f5e6d3 100%);
+            position: relative;
+        }
+        .hero-pattern::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: linear-gradient(to top, rgba(254,249,239,1) 0%, transparent 100%);
+            pointer-events: none;
+        }
+
+        /* Decorative divider */
+        .vintage-divider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            color: #c9a96e;
+        }
+        .vintage-divider::before,
+        .vintage-divider::after {
+            content: '';
+            flex: 1;
+            max-width: 80px;
+            height: 1px;
+            background: linear-gradient(to right, transparent, #c9a96e, transparent);
+        }
+
+        /* Lightbox 弹窗 */
+        .lightbox {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: rgba(74, 50, 40, 0.95);
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .lightbox.active {
+            display: flex;
+        }
+        .lightbox-content {
+            max-width: 90vw;
+            max-height: 85vh;
+            background: white;
+            padding: 16px;
+            border-radius: 4px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            cursor: default;
+        }
+        .lightbox-content img {
+            max-width: 100%;
+            max-height: 70vh;
+            object-fit: contain;
+            border-radius: 2px;
+        }
+        .lightbox-close {
+            position: absolute;
+            top: 24px;
+            right: 32px;
+            color: white;
+            font-size: 40px;
+            cursor: pointer;
+            line-height: 1;
+            transition: opacity 0.2s;
+            z-index: 10000;
+        }
+        .lightbox-close:hover {
+            opacity: 0.7;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #fef9ef; }
+        ::-webkit-scrollbar-thumb { background: #c9a96e; border-radius: 4px; }
+
+        /* Page curl effect on hero */
+        .page-curl {
+            position: relative;
+        }
+        .page-curl::before {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 40px;
+            background: radial-gradient(ellipse at center, rgba(107,78,61,0.08) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        /* Breathing animation for hero flower */
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.08); opacity: 1; }
+        }
+        .breathe {
+            animation: breathe 3s ease-in-out infinite;
+        }
+
+        /* Scroll reveal */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Falling petals */
+        .petal {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9998;
+            animation: fall linear forwards;
+        }
+        @keyframes fall {
+            0% {
+                transform: translateY(-10vh) rotate(0deg) translateX(0px);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.7;
+            }
+            80% {
+                opacity: 0.5;
+            }
+            100% {
+                transform: translateY(105vh) rotate(720deg) translateX(var(--drift));
+                opacity: 0;
+            }
+        }
+
+        /* Back to top button */
+        .back-to-top {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            width: 48px;
+            height: 48px;
+            background: rgba(107, 78, 61, 0.8);
+            color: #fef9ef;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 9997;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+            font-size: 22px;
+            border: none;
+            box-shadow: 0 4px 12px rgba(74, 50, 40, 0.25);
+        }
+        .back-to-top.show {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+        .back-to-top:hover {
+            background: rgba(74, 50, 40, 0.95);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 18px rgba(74, 50, 40, 0.35);
+        }
+
+        /* Heart + 音符双重特效点击 */
+        @keyframes heartFloat {
+            0% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(0.4);
+            }
+            40% {
+                opacity: 1;
+                transform: translate(var(--hx), var(--hy)) scale(1.1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(var(--hx), var(--hy)) scale(0.3);
+            }
+        }
+        .heart-particle {
+            position: fixed;
+            pointer-events: none;
+            z-index: 10001;
+            font-size: 24px;
+            animation: heartFloat 1s ease-out forwards;
+        }
+
+        /* Shimmer effect on photo hover */
+        .photo-frame .placeholder-img::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 60%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+        .photo-frame:hover .placeholder-img::after {
+            opacity: 1;
+        }
+
+        /* 页面柔和过渡 */
+        body {
+            transition: background 0.2s;
+        }
+    </style>
+</head>
+<body class="bg-vintage-cream font-body text-vintage-brown min-h-screen">
+
+    <!-- 飘落花瓣容器 -->
+    <div id="petal-container"></div>
+
+    <!-- 回到顶部按钮 -->
+    <button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="回到顶部" aria-label="回到顶部">↑</button>
+
+    <!-- Hero 主视觉区：姐姐和外婆 -->
+    <header class="hero-pattern pt-20 pb-16 px-6 text-center page-curl">
+        <div class="max-w-3xl mx-auto reveal">
+            <div class="text-5xl mb-6 breathe inline-block">👩‍👧🌸</div>
+            <h1 class="text-4xl md:text-5xl font-display font-bold text-vintage-darkbrown mb-6 tracking-wide">
+                加油回忆录
+            </h1>
+            <div class="vintage-divider mb-6">
+                <span class="text-vintage-gold text-lg">✦</span>
+            </div>
+            <p class="text-xl md:text-2xl text-vintage-brown font-light leading-relaxed mb-4">
+                照片里还可以加一个人，我们等你来
+            </p>
+            <p class="text-lg text-vintage-darkgold font-light">
+                敬这破碎的、盛大的、又热气腾腾的世界。过往不回头，余生不将就
+            </p>
+            <div class="mt-12 text-vintage-gold animate-bounce">
+                <svg class="w-8 h-8 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
+                </svg>
+            </div>
+        </div>
+    </header>
+
+    <!-- 岁月相册：使用真实照片路径 完全沿用“俺/”下的照片 -->
+    <section class="max-w-6xl mx-auto px-6 py-16 md:py-20">
+        <div class="text-center mb-16 reveal">
+            <span class="text-3xl opacity-70">📷</span>
+            <h2 class="text-3xl md:text-4xl font-display font-bold text-vintage-darkbrown mt-4 mb-4">
+                岁月相册
+            </h2>
+            <div class="vintage-divider">
+                <span class="text-vintage-gold text-base">❀</span>
+            </div>
+            <p class="text-base text-vintage-darkgold mt-4 font-light">点击照片放大 · 每一帧都藏着爱</p>
+        </div>
+
+        <!-- 照片网格: 共10张，包含完整真实图片链接 (与之前外婆回忆录照片一致，献给姐姐和外婆共同的回忆) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
+
+            <!-- 照片1: 第一次来西安 -->
+            <div class="photo-frame reveal cursor-pointer" onclick="openLightbox(1)">
+                <div class="placeholder-img">
+                    <img src="俺/1 (8).jpg" alt="第一次来西安" loading="lazy">
+                </div>
+                <p class="text-center text-vintage-brown text-base mt-3 font-light">第一次来西安 🏯</p>
+            </div>
+
+            <!-- 照片2: 好久没打篮球了 -->
+            <div class="photo-frame reveal cursor-pointer" onclick="openLightbox(2)">
+                <div class="placeholder-img">
+                    <img src="俺/1 (29).jpg" alt="好久没打篮球了" loading="lazy">
+                </div>
+                <p class="text-center text-vintage-brown text-base mt-3 font-light">好久没打篮球了 🏀</p>
+            </div>
+
+            <!-- 照片3: 我的学校 · 夕阳 -->
+            <div class="photo-frame reveal cursor-pointer" onclick="openLightbox(3)">
+                <div class="placeholder-img">
+                    <img src="俺/0偶然的夕阳.jpg" alt="我的学校" loading="lazy">
+                </div>
+                <p class="text-center text-vintage-brown text-base mt-3 font-light">我的学校 · 夕阳余晖</p>
+            </div>
+
+            <!-- 照片4: 早上跳舞 -->
+            <div class="photo-frame reveal cursor-pointer" onclick="openLightbox(4)">
+                <div class="placeholder-img">
+                    <img src="俺/1 (94).jpg" alt="早上跳舞" loading="lazy">
+                </div>
+                <p class="text-center text-vintage-brown text-base mt-3 font-light">早上跳舞 💃</p>
+            </div>
+
+            <!-- 照片5: 口语论坛 -->
+            <div class="photo-frame reveal cursor-pointer" onclick="openLightbox(5)">
+                <div class="placeholder-img">
+                    <img src="俺/1 (295).jpg" alt="口语论坛" loading="lazy">
+                </div>
+                <p class="text-center text-vintage-brown text-base mt-3 font-light">口语论坛 🎙️</p>
+            </div>
+
+            <!-- 照片6: 活动结束 -->
+            <div class="photo-frame reveal cursor-pointer" onclick="openLightbox(6)">
+                <div class="placeholder-img">
+                    <img src="俺/1 (247).jpg" alt="活动结束" loading="lazy">
+                </div>
+                <p class="text-center text-vintage-brown text-base mt-3 font-light">活动结束 · 灿烂笑容</p>
+            </div>
+
+            <!-- 照片7: 演讲初赛 -->
+            <div class="photo-frame reveal cursor-pointer" onclick="openLightbox(7)">
+                <div class="placeholder-img">
+                    <img src="俺/演讲.jpg" alt="演讲初赛" loading="lazy">
+                </div>
+                <p class="text-center text-vintage-brown text-base mt-3 font-light">进初赛啦 🎤 勇敢表达</p>
+            </div>
+
+            <!-- 照片8: 第一次应用项目 -->
+            <div class="photo-frame reveal cursor-pointer" onclick="openLightbox(8)">
+                <div class="placeholder-img">
+                    <img src="俺/第一个项目.jpg" alt="第一次应用项目" loading="lazy">
+                </div>
+                <p class="text-center text-vintage-brown text-base mt-3 font-light">项目小组 · 第一次应用项目</p>
+            </div>
+
+            <!-- 照片9: 和高出去玩 (报纸) -->
+            <div class="photo-frame reveal cursor-pointer" onclick="openLightbox(9)">
+                <div class="placeholder-img">
+                    <img src="俺/和高出去玩 (41).jpg" alt="和高出去玩" loading="lazy">
+                </div>
+                <p class="text-center text-vintage-brown text-base mt-3 font-light">上报纸啦哈哈 📰</p>
+            </div>
+
+            <!-- 照片10: 向阳而生 大合照风格居中 -->
+            <div class="photo-frame reveal cursor-pointer col-span-1 sm:col-span-2 lg:col-span-3 max-w-md mx-auto w-full" onclick="openLightbox(10)">
+                <div class="placeholder-img">
+                    <img src="俺/向阳而生.jpg" alt="向阳而生" loading="lazy">
+                </div>
+                <p class="text-center text-vintage-brown text-base mt-3 font-light">我们在一起 · 向阳而生 🌻</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 心里的话：想对姐姐 & 外婆说（温情升级） -->
+    <section class="bg-vintage-paper py-16 md:py-20 px-6">
+        <div class="max-w-2xl mx-auto text-center reveal">
+            <span class="text-3xl opacity-70">💌👵👧</span>
+            <h2 class="text-3xl md:text-4xl font-display font-bold text-vintage-darkbrown mt-4 mb-8">
+                留言
+            </h2>
+            <div class="vintage-divider mb-8">
+                <span class="text-vintage-gold text-base">❀</span>
+            </div>
+            <div class="bg-white/70 rounded-lg p-8 md:p-10 shadow-sm border border-vintage-warm">
+                <p class="text-xl md:text-2xl leading-relaxed text-vintage-darkbrown font-light">
+                    外婆，您辛苦了。
+                </p>
+                <p class="text-lg md:text-xl leading-relaxed text-vintage-brown font-light mt-6">
+                    这些照片记录了我们在一起的点点滴滴，每一张都是我们最珍贵的回忆。
+                </p>
+                <p class="text-lg md:text-xl leading-relaxed text-vintage-brown font-light mt-6">
+                    希望你看了能开心一点，我们一直在你身后
+                </p>
+                <div class="mt-8 text-4xl">
+                    🌸 👩‍👧 🌷 🌺
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer 底部 -->
+    <footer class="bg-vintage-darkbrown text-vintage-cream py-12 px-6 text-center">
+        <div class="max-w-3xl mx-auto reveal">
+           <p class="text-base md:text-lg text-vintage-warm font-light">
+                时光会走远，但爱永远留在心间
+            </p>
+            <p class="text-sm text-vintage-darkgold mt-8 font-light">
+                为最亲爱的外婆制作 ❤️
+            </p>
+        </div>
+    </footer>
+
+    <!-- Lightbox 灯箱组件 (真实图片显示) -->
+    <div id="lightbox" class="lightbox" onclick="closeLightbox(event)">
+        <span class="lightbox-close" onclick="closeLightbox(event)">&times;</span>
+        <div class="lightbox-content" onclick="event.stopPropagation()" style="background: white; padding: 16px; border-radius: 4px;">
+            <img id="lightbox-img" class="object-contain" style="max-width: 80vw; max-height: 70vh;" alt="回忆放大">
+            <p id="lightbox-caption" class="text-center text-vintage-brown text-lg mt-3 font-light">珍贵的记忆</p>
+        </div>
+    </div>
+
+    <script>
+        // 与照片顺序对应的温情描述
+        const captions = [
+            '🏯 第一次来西安，眼里满是新奇',
+            '🏀 好久没打篮球，活力飞扬的时刻',
+            '🌇 我的学校，夕阳温柔记录青春',
+            '💃 早上跳舞，生活的旋律轻快起舞',
+            '🎙️ 口语论坛，自信与成长的光',
+            '✨ 活动结束，每一份努力都闪光',
+            '🎤 演讲初赛，勇敢站上台的瞬间',
+            '💻 项目小组，第一次应用项目，共同协作的回忆',
+            '📰 上报纸啦，最可爱的笑容被看见',
+            '🌻 我们在一起，向阳而生，爱永不落幕'
+        ];
+
+        // ===== Lightbox 完全功能性 (从照片中抓取真实图片) =====
+        function openLightbox(num) {
+            const lb = document.getElementById('lightbox');
+            const lightboxImg = document.getElementById('lightbox-img');
+            // 获取对应的photo-frame里面的img元素
+            const photoFrames = document.querySelectorAll('.photo-frame');
+            if (photoFrames.length >= num) {
+                const targetFrame = photoFrames[num - 1];
+                const imgElement = targetFrame.querySelector('.placeholder-img img');
+                if (imgElement && imgElement.src) {
+                    lightboxImg.src = imgElement.src;
+                } else {
+                    // fallback 占位：保持优雅空白
+                    lightboxImg.src = '';
+                }
+            } else {
+                lightboxImg.src = '';
+            }
+            const captionEl = document.getElementById('lightbox-caption');
+            if (captionEl) captionEl.textContent = captions[num - 1] || '温暖的瞬间';
+            lb.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLightbox(event) {
+            if (event.target === document.getElementById('lightbox') ||
+                event.target.classList.contains('lightbox-close')) {
+                document.getElementById('lightbox').classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const lightboxActive = document.getElementById('lightbox');
+                if (lightboxActive.classList.contains('active')) {
+                    lightboxActive.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            }
+        });
+
+        // ===== Scroll Reveal 滚动出现特效 =====
+        const revealElements = document.querySelectorAll('.reveal');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.15, rootMargin: '0px 0px -30px 0px' });
+        revealElements.forEach(el => observer.observe(el));
+
+        // ===== 回到顶部按钮 =====
+        const backToTopBtn = document.getElementById('backToTop');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 400) {
+                backToTopBtn.classList.add('show');
+            } else {
+                backToTopBtn.classList.remove('show');
+            }
+        });
+
+        // ===== 飘落花瓣特效 (原版保留，温馨浪漫) =====
+        const petalEmojis = ['🌸', '🌺', '🌷', '💮', '🌼', '🍂', '🌸', '🌼'];
+        const petalContainer = document.getElementById('petal-container');
+
+        function createPetal() {
+            const petal = document.createElement('span');
+            petal.className = 'petal';
+            petal.textContent = petalEmojis[Math.floor(Math.random() * petalEmojis.length)];
+            petal.style.left = Math.random() * 95 + '%';
+            petal.style.fontSize = (14 + Math.random() * 18) + 'px';
+            petal.style.setProperty('--drift', (Math.random() * 100 - 50) + 'px');
+            petal.style.animationDuration = (7 + Math.random() * 10) + 's';
+            petal.style.opacity = 0.85;
+            petalContainer.appendChild(petal);
+
+            petal.addEventListener('animationend', () => {
+                petal.remove();
+            });
+        }
+
+        let petalInterval;
+        function startPetals() {
+            // 先飘落几片
+            for (let i = 0; i < 3; i++) setTimeout(createPetal, i * 200);
+            petalInterval = setInterval(createPetal, 2000);
+        }
+        startPetals();
+
+        // ===== 增强点击特效：爱心+小星星 同时出现 (既保留Heart又增加惊喜) =====
+        // 添加两种小粒子: 爱心 和 闪光小星，让姐姐和外婆感受到更多温暖
+        document.querySelectorAll('.photo-frame').forEach(frame => {
+            frame.addEventListener('click', function(e) {
+                // 爱心粒子
+                const heart = document.createElement('span');
+                heart.className = 'heart-particle';
+                heart.textContent = '❤️';
+                heart.style.left = e.clientX + 'px';
+                heart.style.top = e.clientY + 'px';
+                heart.style.setProperty('--hx', (Math.random() * 80 - 40) + 'px');
+                heart.style.setProperty('--hy', (-60 - Math.random() * 80) + 'px');
+                document.body.appendChild(heart);
+                
+                // 增加一个可爱的星星/闪光粒子（表达“闪闪发光的回忆”）
+                const star = document.createElement('span');
+                star.className = 'heart-particle';
+                star.textContent = '✨';
+                star.style.fontSize = '22px';
+                star.style.left = (e.clientX - 10) + 'px';
+                star.style.top = (e.clientY - 15) + 'px';
+                star.style.setProperty('--hx', (Math.random() * 70 - 35) + 'px');
+                star.style.setProperty('--hy', (-50 - Math.random() * 70) + 'px');
+                document.body.appendChild(star);
+                
+                // 第三个可选花瓣感 小🌸 
+                const tinyFlower = document.createElement('span');
+                tinyFlower.className = 'heart-particle';
+                tinyFlower.textContent = '🌸';
+                tinyFlower.style.fontSize = '20px';
+                tinyFlower.style.left = (e.clientX + 12) + 'px';
+                tinyFlower.style.top = (e.clientY - 5) + 'px';
+                tinyFlower.style.setProperty('--hx', (Math.random() * 60 - 30) + 'px');
+                tinyFlower.style.setProperty('--hy', (-45 - Math.random() * 65) + 'px');
+                document.body.appendChild(tinyFlower);
+                
+                heart.addEventListener('animationend', () => heart.remove());
+                star.addEventListener('animationend', () => star.remove());
+                tinyFlower.addEventListener('animationend', () => tinyFlower.remove());
+            });
+        });
+
+        // 额外：确保照片加载失败时显示温柔占位（避免破裂）
+        const allImages = document.querySelectorAll('.photo-frame .placeholder-img img');
+        allImages.forEach(img => {
+            img.addEventListener('error', function() {
+                // 若图片路径不存在，静默占位不破坏布局 (不显示破碎图标)
+                this.style.opacity = '0.6';
+                this.style.background = '#f5e6d3';
+                this.alt = '回忆珍藏';
+            });
+        });
+    </script>
+</body>
+</html>
+```

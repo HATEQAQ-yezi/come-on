@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>妹妹</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        pink: {
+                            cream: '#fff5f7',
+                            paper: '#ffe4ec',
+                            warm: '#ffd6e0',
+                            gold: '#f0a5ba',
+                            darkgold: '#d47894',
+                            brown: '#8b5a6b',
+                            darkbrown: '#5c3d4a',
+                        }
+                    },
+                    fontFamily: {
+                        display: ['"Noto Serif SC"', '"STSong"', '"SimSun"', 'serif'],
+                        body: ['"Noto Sans SC"', '"Microsoft YaHei"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@400;600;700&display=swap');
+
+        html { scroll-behavior: smooth; }
+
+        .photo-frame {
+            position: relative;
+            background: white;
+            padding: 12px 12px 40px 12px;
+            box-shadow: 0 4px 15px rgba(139, 90, 107, 0.12), 0 1px 3px rgba(139, 90, 107, 0.08);
+            border-radius: 4px;
+            transition: all 0.35s ease;
+        }
+        .photo-frame:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 30px rgba(139, 90, 107, 0.18), 0 3px 8px rgba(139, 90, 107, 0.1);
+        }
+        .photo-frame .placeholder-img {
+            width: 100%;
+            aspect-ratio: 4/3;
+            background: linear-gradient(135deg, #ffe4ec 0%, #ffd6e0 30%, #fff5f7 60%, #ffe4ec 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 2px;
+            position: relative;
+            overflow: hidden;
+        }
+        .photo-frame .placeholder-img::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(45deg, transparent, transparent 3px, rgba(240,165,186,0.06) 3px, rgba(240,165,186,0.06) 6px);
+        }
+        .photo-frame .placeholder-img::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 60%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+        .photo-frame:hover .placeholder-img::after { opacity: 1; }
+
+        .hero-pattern {
+            background: linear-gradient(135deg, #fff5f7 0%, #ffe4ec 40%, #ffd6e0 100%);
+            position: relative;
+        }
+        .hero-pattern::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 80px;
+            background: linear-gradient(to top, rgba(255,245,247,1) 0%, transparent 100%);
+            pointer-events: none;
+        }
+
+        .vintage-divider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            color: #f0a5ba;
+        }
+        .vintage-divider::before, .vintage-divider::after {
+            content: '';
+            flex: 1;
+            max-width: 80px;
+            height: 1px;
+            background: linear-gradient(to right, transparent, #f0a5ba, transparent);
+        }
+
+        .lightbox { display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(92,61,74,0.95); align-items: center; justify-content: center; cursor: pointer; }
+        .lightbox.active { display: flex; }
+        .lightbox-content { max-width: 90vw; max-height: 85vh; background: white; padding: 16px; border-radius: 4px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); cursor: default; }
+        .lightbox-close { position: absolute; top: 24px; right: 32px; color: white; font-size: 40px; cursor: pointer; line-height: 1; transition: opacity 0.2s; z-index: 10000; }
+        .lightbox-close:hover { opacity: 0.7; }
+
+        @keyframes breathe { 0%,100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.08); opacity: 1; } }
+        .breathe { animation: breathe 3s ease-in-out infinite; }
+
+        .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.7s ease, transform 0.7s ease; }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+
+        .petal { position: fixed; pointer-events: none; z-index: 9998; animation: fall linear forwards; }
+        @keyframes fall {
+            0% { transform: translateY(-10vh) rotate(0deg) translateX(0px); opacity: 0; }
+            10% { opacity: 0.7; }
+            80% { opacity: 0.5; }
+            100% { transform: translateY(105vh) rotate(720deg) translateX(var(--drift)); opacity: 0; }
+        }
+
+        .back-to-top {
+            position: fixed; bottom: 32px; right: 32px; width: 48px; height: 48px;
+            background: rgba(139,90,107,0.8); color: #fff5f7; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+            z-index: 9997; opacity: 0; transform: translateY(20px); transition: all 0.3s ease;
+            pointer-events: none; font-size: 22px; border: none;
+            box-shadow: 0 4px 12px rgba(92,61,74,0.25);
+        }
+        .back-to-top.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .back-to-top:hover { background: rgba(92,61,74,0.95); transform: translateY(-3px); }
+
+        @keyframes heartFloat {
+            0% { opacity: 1; transform: translate(-50%,-50%) scale(0.4); }
+            40% { opacity: 1; transform: translate(var(--hx),var(--hy)) scale(1.1); }
+            100% { opacity: 0; transform: translate(var(--hx),var(--hy)) scale(0.3); }
+        }
+        .heart-particle { position: fixed; pointer-events: none; z-index: 10001; font-size: 24px; animation: heartFloat 1s ease-out forwards; }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #fff5f7; }
+        ::-webkit-scrollbar-thumb { background: #f0a5ba; border-radius: 4px; }
+
+        .page-curl { position: relative; }
+        .page-curl::before {
+            content: '';
+            position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%);
+            width: 60%; height: 40px;
+            background: radial-gradient(ellipse at center, rgba(139,90,107,0.06) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body class="bg-pink-cream font-body text-pink-brown min-h-screen">
+
+    <div id="petal-container"></div>
+    <button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="回到顶部">↑</button>
+
+    <!-- Hero -->
+    <header class="hero-pattern pt-20 pb-16 px-6 text-center page-curl">
+        <div class="max-w-3xl mx-auto reveal">
+            <div class="text-5xl mb-6 breathe inline-block">🌸</div>
+            <h1 class="text-4xl md:text-5xl font-display font-bold text-pink-darkbrown mb-6 tracking-wide">妹妹</h1>
+            <div class="vintage-divider mb-6"><span class="text-pink-gold text-lg">✦</span></div>
+            <p class="text-xl md:text-2xl text-pink-brown font-light leading-relaxed mb-4">天真烂漫，温暖相伴</p>
+            <p class="text-lg text-pink-darkgold font-light">每一张照片，都是妹妹最甜蜜的时光</p>
+            <div class="mt-12 text-pink-gold animate-bounce">
+                <svg class="w-8 h-8 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
+                </svg>
+            </div>
+        </div>
+    </header>
+
+    <!-- Photo Gallery -->
+    <section class="max-w-6xl mx-auto px-6 py-16 md:py-20">
+        <div class="text-center mb-16 reveal">
+            <span class="text-3xl opacity-70">📷</span>
+            <h2 class="text-3xl md:text-4xl font-display font-bold text-pink-darkbrown mt-4 mb-4">妹妹的相册</h2>
+            <div class="vintage-divider"><span class="text-pink-gold text-base">❀</span></div>
+            <p class="text-base text-pink-darkgold mt-4 font-light">点击照片可放大查看</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
+            <div class="photo-frame reveal cursor-pointer" onclick="openLightbox(1)"><div class="placeholder-img"><div class="text-center relative z-10"><svg class="w-16 h-16 md:w-20 md:h-20 mx-auto text-pink-gold opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg><p class="text-pink-darkgold text-base md:text-lg mt-3 font-light">照片 1</p></div></div><p class="text-center text-pink-brown text-base mt-3 font-light">外婆抱着我</p></div>
+            <div class="photo-frame reveal cursor-pointer" onclick="openLightbox(2)"><div class="placeholder-img"><div class="text-center relative z-10"><svg class="w-16 h-16 md:w-20 md:h-20 mx-auto text-pink-gold opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg><p class="text-pink-darkgold text-base md:text-lg mt-3 font-light">照片 2</p></div></div><p class="text-center text-pink-brown text-base mt-3 font-light">一起散步</p></div>
+            <div class="photo-frame reveal cursor-pointer" onclick="openLightbox(3)"><div class="placeholder-img"><div class="text-center relative z-10"><svg class="w-16 h-16 md:w-20 md:h-20 mx-auto text-pink-gold opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg><p class="text-pink-darkgold text-base md:text-lg mt-3 font-light">照片 3</p></div></div><p class="text-center text-pink-brown text-base mt-3 font-light">外婆的怀抱</p></div>
+            <div class="photo-frame reveal cursor-pointer" onclick="openLightbox(4)"><div class="placeholder-img"><div class="text-center relative z-10"><svg class="w-16 h-16 md:w-20 md:h-20 mx-auto text-pink-gold opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg><p class="text-pink-darkgold text-base md:text-lg mt-3 font-light">照片 4</p></div></div><p class="text-center text-pink-brown text-base mt-3 font-light">甜甜的笑</p></div>
+            <div class="photo-frame reveal cursor-pointer" onclick="openLightbox(5)"><div class="placeholder-img"><div class="text-center relative z-10"><svg class="w-16 h-16 md:w-20 md:h-20 mx-auto text-pink-gold opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg><p class="text-pink-darkgold text-base md:text-lg mt-3 font-light">照片 5</p></div></div><p class="text-center text-pink-brown text-base mt-3 font-light">外婆讲故事</p></div>
+            <div class="photo-frame reveal cursor-pointer" onclick="openLightbox(6)"><div class="placeholder-img"><div class="text-center relative z-10"><svg class="w-16 h-16 md:w-20 md:h-20 mx-auto text-pink-gold opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg><p class="text-pink-darkgold text-base md:text-lg mt-3 font-light">照片 6</p></div></div><p class="text-center text-pink-brown text-base mt-3 font-light">快乐的时光</p></div>
+            <div class="photo-frame reveal cursor-pointer" onclick="openLightbox(7)"><div class="placeholder-img"><div class="text-center relative z-10"><svg class="w-16 h-16 md:w-20 md:h-20 mx-auto text-pink-gold opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg><p class="text-pink-darkgold text-base md:text-lg mt-3 font-light">照片 7</p></div></div><p class="text-center text-pink-brown text-base mt-3 font-light">外婆的乖宝贝</p></div>
+            <div class="photo-frame reveal cursor-pointer" onclick="openLightbox(8)"><div class="placeholder-img"><div class="text-center relative z-10"><svg class="w-16 h-16 md:w-20 md:h-20 mx-auto text-pink-gold opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg><p class="text-pink-darkgold text-base md:text-lg mt-3 font-light">照片 8</p></div></div><p class="text-center text-pink-brown text-base mt-3 font-light">手牵手</p></div>
+            <div class="photo-frame reveal cursor-pointer" onclick="openLightbox(9)"><div class="placeholder-img"><div class="text-center relative z-10"><svg class="w-16 h-16 md:w-20 md:h-20 mx-auto text-pink-gold opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg><p class="text-pink-darkgold text-base md:text-lg mt-3 font-light">照片 9</p></div></div><p class="text-center text-pink-brown text-base mt-3 font-light">最幸福的事</p></div>
+            <div class="photo-frame reveal cursor-pointer col-span-1 sm:col-span-2 lg:col-span-3 max-w-md mx-auto w-full" onclick="openLightbox(10)"><div class="placeholder-img"><div class="text-center relative z-10"><svg class="w-16 h-16 md:w-20 md:h-20 mx-auto text-pink-gold opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg><p class="text-pink-darkgold text-base md:text-lg mt-3 font-light">照片 10</p></div></div><p class="text-center text-pink-brown text-base mt-3 font-light">永远爱您</p></div>
+        </div>
+    </section>
+
+    <!-- Message -->
+    <section class="bg-pink-paper py-16 md:py-20 px-6">
+        <div class="max-w-2xl mx-auto text-center reveal">
+            <span class="text-3xl opacity-70">💝</span>
+            <h2 class="text-3xl md:text-4xl font-display font-bold text-pink-darkbrown mt-4 mb-8">想对妹妹说</h2>
+            <div class="vintage-divider mb-8"><span class="text-pink-gold text-base">❀</span></div>
+            <div class="bg-white/70 rounded-lg p-8 md:p-10 shadow-sm border border-pink-warm">
+                <p class="text-xl md:text-2xl leading-relaxed text-pink-darkbrown font-light">亲爱的妹妹，</p>
+                <p class="text-lg md:text-xl leading-relaxed text-pink-brown font-light mt-6">你是外婆最疼爱的小宝贝，这些照片记录了你和外婆的点点滴滴。</p>
+                <p class="text-lg md:text-xl leading-relaxed text-pink-brown font-light mt-6">愿你和外婆在一起的每一天都幸福快乐！<br>我们永远爱你。💕</p>
+                <div class="mt-8 text-4xl">🌸 🎀 🌺</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-pink-darkbrown text-pink-cream py-12 px-6 text-center">
+        <div class="max-w-3xl mx-auto reveal">
+            <p class="text-xl md:text-2xl font-display mb-4">妹妹和外婆</p>
+            <div class="vintage-divider mb-4"><span class="text-pink-gold text-sm">✦</span></div>
+            <p class="text-base md:text-lg text-pink-warm font-light">每一个笑容，都是最美的风景</p>
+            <p class="text-sm text-pink-darkgold mt-8 font-light">为妹妹和外婆制作 💕</p>
+        </div>
+    </footer>
+
+    <!-- Lightbox -->
+    <div id="lightbox" class="lightbox" onclick="closeLightbox(event)">
+        <span class="lightbox-close" onclick="closeLightbox(event)">&times;</span>
+        <div class="lightbox-content" onclick="event.stopPropagation()">
+            <div id="lightbox-img" class="placeholder-img" style="width:80vw;max-width:700px;aspect-ratio:4/3;">
+                <div class="text-center relative z-10">
+                    <svg class="w-20 h-20 md:w-24 md:h-24 mx-auto text-pink-gold opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    <p class="text-pink-darkgold text-xl md:text-2xl mt-4 font-light">照片 <span id="lightbox-num">1</span></p>
+                </div>
+            </div>
+            <p class="text-center text-pink-brown text-lg mt-3 font-light" id="lightbox-caption"></p>
+        </div>
+    </div>
+
+    <script>
+        const captions = ['外婆抱着我','一起散步','外婆的怀抱','甜甜的笑','外婆讲故事','快乐的时光','外婆的乖宝贝','手牵手','最幸福的事','永远爱您'];
+
+        function openLightbox(num) {
+            document.getElementById('lightbox-num').textContent = num;
+            document.getElementById('lightbox-caption').textContent = captions[num-1];
+            document.getElementById('lightbox').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeLightbox(event) {
+            if (event.target === document.getElementById('lightbox') || event.target.classList.contains('lightbox-close')) {
+                document.getElementById('lightbox').classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        }
+        document.addEventListener('keydown', e => { if (e.key==='Escape') { document.getElementById('lightbox').classList.remove('active'); document.body.style.overflow=''; }});
+
+        const observer = new IntersectionObserver(entries => { entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('visible'); observer.unobserve(e.target); }}) }, {threshold:0.15,rootMargin:'0px 0px -40px 0px'});
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+        const btn = document.getElementById('backToTop');
+        window.addEventListener('scroll', () => { btn.classList.toggle('show', window.scrollY > 400); });
+
+        const petals = ['🌸','🎀','💮','🌷','✨','💕'];
+        const petalContainer = document.getElementById('petal-container');
+        function createPetal() {
+            const p = document.createElement('span');
+            p.className = 'petal';
+            p.textContent = petals[Math.floor(Math.random()*petals.length)];
+            p.style.left = Math.random()*95 + '%';
+            p.style.fontSize = (14+Math.random()*16)+'px';
+            p.style.setProperty('--drift',(Math.random()*100-50)+'px');
+            p.style.animationDuration = (8+Math.random()*10)+'s';
+            petalContainer.appendChild(p);
+            p.addEventListener('animationend',()=>p.remove());
+        }
+        createPetal(); createPetal(); createPetal();
+        setInterval(createPetal, 2200);
+
+        document.querySelectorAll('.photo-frame').forEach(frame => {
+            frame.addEventListener('click', function(e) {
+                const h = document.createElement('span');
+                h.className = 'heart-particle';
+                h.textContent = '💕';
+                h.style.left = e.clientX+'px';
+                h.style.top = e.clientY+'px';
+                h.style.setProperty('--hx',(Math.random()*80-40)+'px');
+                h.style.setProperty('--hy',(-60-Math.random()*80)+'px');
+                document.body.appendChild(h);
+                h.addEventListener('animationend',()=>h.remove());
+            });
+        });
+    </script>
+</body>
+</html>
